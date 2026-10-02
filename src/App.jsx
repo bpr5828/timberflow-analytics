@@ -9,7 +9,7 @@ import { CreateMLCEngine } from '@mlc-ai/web-llm';
 const COLORS = ['#10b981', '#f59e0b', '#3b82f6', '#8b5cf6', '#ec4899'];
 
 function Login({ onLogin }) {
-  const [email, setEmail] = useState('b.cone@timberflow.com');
+  const [email, setEmail] = useState('john.doe@ajalonsolutions.com');
   const [password, setPassword] = useState('password123');
   
   return (
@@ -26,7 +26,7 @@ function Login({ onLogin }) {
         <form onSubmit={(e) => { e.preventDefault(); onLogin(); }} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
-            <input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="w-full bg-slate-800/50 border border-slate-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all" placeholder="b.cone@timberflow.com" required />
+            <input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="w-full bg-slate-800/50 border border-slate-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all" placeholder="john.doe@ajalonsolutions.com" required />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">Password</label>
@@ -140,16 +140,16 @@ export default function App() {
             <div className="relative">
               <div onClick={() => setShowProfileMenu(!showProfileMenu)} className="flex items-center gap-2 sm:gap-3 cursor-pointer p-1.5 rounded-xl hover:bg-slate-800/50 border border-transparent">
                 <div className="text-right hidden sm:block">
-                  <p className="font-semibold text-sm text-slate-200">Bryan Cone</p>
+                  <p className="font-semibold text-sm text-slate-200">John Doe</p>
                   <p className="text-emerald-500 font-medium text-xs">CFO</p>
                 </div>
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 p-0.5 shrink-0"><div className="w-full h-full bg-slate-900 rounded-[10px] flex items-center justify-center font-bold text-xs sm:text-sm">BC</div></div>
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 p-0.5 shrink-0"><div className="w-full h-full bg-slate-900 rounded-[10px] flex items-center justify-center font-bold text-xs sm:text-sm">JD</div></div>
               </div>
               {showProfileMenu && (
                 <div className="absolute right-0 mt-2 w-56 glass-panel rounded-xl shadow-2xl py-2 z-50 border border-slate-700/50">
                   <div className="px-4 py-3 border-b border-slate-800/50">
-                    <p className="text-sm font-semibold text-white">Bryan Cone</p>
-                    <p className="text-xs text-slate-400">cfo@timberflow.com</p>
+                    <p className="text-sm font-semibold text-white">John Doe</p>
+                    <p className="text-xs text-slate-400">john.doe@ajalonsolutions.com</p>
                   </div>
                   <div className="border-t border-slate-800/50 py-2">
                     <div onClick={() => setIsAuthenticated(false)} className="flex items-center gap-3 px-4 py-2 text-sm cursor-pointer text-rose-400 hover:bg-rose-500/10">
