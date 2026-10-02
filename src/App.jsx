@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, LineChart, Line } from 'recharts';
-import { Search, Bell, LayoutDashboard, Factory, CircleDollarSign, Truck, MessageSquare, ChevronDown, LogOut, Settings, User, Terminal, Table as TableIcon, BarChart2, LineChart as LineChartIcon, Activity, X } from 'lucide-react';
+import { Search, Bell, LayoutDashboard, Factory, CircleDollarSign, Truck, MessageSquare, ChevronDown, LogOut, Settings, User, Terminal, Table as TableIcon, BarChart2, LineChart as LineChartIcon, Activity, X, Database, Network, Cloud, ArrowRight, RefreshCw, Server } from 'lucide-react';
 import { entities } from './data/masterData';
 import { financials } from './data/financialsData';
 import { operations, pieceRateLogs } from './data/operationsData';
@@ -46,6 +46,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedEntity, setSelectedEntity] = useState('All');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.add('dark');
@@ -81,6 +82,10 @@ export default function App() {
           <NavItem icon={<Factory />} label="Plant Operations" active={activeTab === 'operations'} onClick={() => setActiveTab('operations')} />
           <NavItem icon={<CircleDollarSign />} label="Financial Analysis" active={activeTab === 'financials'} onClick={() => setActiveTab('financials')} />
         </nav>
+        
+        <div className="px-4 pb-4">
+          <NavItem icon={<Network />} label="Data Flow" active={activeTab === 'architecture'} onClick={() => setActiveTab('architecture')} />
+        </div>
 
         <div className="p-5 border-t border-slate-800/60 bg-[#0a0f1c]">
           <div className="flex items-center gap-2 mb-2">
@@ -92,10 +97,7 @@ export default function App() {
 
       <main className="flex-1 flex flex-col relative z-10 h-screen overflow-hidden bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#0a0f1c] to-[#0a0f1c]">
         <header className="h-20 glass-panel border-b-0 border-slate-800/40 flex items-center justify-between px-8 z-30">
-          <div className="flex items-center bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-2.5 w-[400px]">
-            <Search className="w-4 h-4 text-slate-400 mr-3" />
-            <input type="text" placeholder="Search..." className="bg-transparent border-none outline-none text-sm w-full text-white" />
-          </div>
+          <div></div>
           
           <div className="flex items-center gap-6">
             <select 
@@ -131,7 +133,8 @@ export default function App() {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-8 pb-20 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-8 pb-20 custom-scrollbar relative">
+          {isChatOpen && <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-40 transition-all duration-300" onClick={() => setIsChatOpen(false)} />}
           {activeTab === 'dashboard' && (
             <DashboardView totalRevenue={totalRevenue} totalLabor={totalLabor} financials={filteredFinancials} revenueData={revenueData} />
           )}
@@ -141,11 +144,14 @@ export default function App() {
           {activeTab === 'financials' && (
             <FinancialsView financials={filteredFinancials} />
           )}
+          {activeTab === 'architecture' && (
+            <DataArchitectureView />
+          )}
         </div>
       </main>
 
       {/* Floating Tim AI Chat Widget */}
-      <ChatWidget />
+      <ChatWidget isOpen={isChatOpen} setIsOpen={setIsChatOpen} />
 
     </div>
   );
@@ -164,6 +170,13 @@ function DashboardView({ totalRevenue, totalLabor, financials, revenueData }) {
         <PremiumKpiCard title="Direct Labor %" value={`${totalRevenue ? ((totalLabor / totalRevenue) * 100).toFixed(1) : 0}%`} trend="-1.2%" chartData={[30,28,26,25,24]} color="amber" isGood />
         <PremiumKpiCard title="Avg Margin" value="21.4%" trend="+2.1%" chartData={[18,19,20,21,21.4]} color="purple" isGood />
         <PremiumKpiCard title="ERP-to-Payroll" value="100%" trend="Sync Active" chartData={[100,100,100,100]} color="blue" isGood />
+      </div>
+
+      <div className="grid grid-cols-4 gap-6 mb-8">
+        <PremiumKpiCard title="Total Inventory Value" value="$8.5M" trend="+5.2%" chartData={[7.5,7.8,8.0,8.2,8.5]} color="blue" isGood />
+        <PremiumKpiCard title="Order Backlog" value="$15.4M" trend="+1.1%" chartData={[12,13,14,14.5,15.4]} color="emerald" isGood />
+        <PremiumKpiCard title="Machine Downtime" value="44 hrs" trend="-15%" chartData={[60,55,50,48,44]} color="amber" isGood />
+        <PremiumKpiCard title="Yield Variance" value="1.9%" trend="-0.4%" chartData={[2.5,2.4,2.2,2.0,1.9]} color="emerald" isGood />
       </div>
 
       <div className="grid grid-cols-3 gap-6 mb-8">
@@ -296,8 +309,7 @@ function FinancialsView({ financials }) {
   );
 }
 
-function ChatWidget() {
-  const [isOpen, setIsOpen] = useState(false);
+function ChatWidget({ isOpen, setIsOpen }) {
   const [messages, setMessages] = useState([{ id: 0, role: 'assistant', text: "Hello! I'm Tim, your Timber Intelligence Manager. Ask me anything about yields, financials, or piece-rates.", type: 'text' }]);
   const [input, setInput] = useState('');
   const [engine, setEngine] = useState(null);
@@ -359,6 +371,28 @@ function ChatWidget() {
       return;
     }
 
+    if (q.toLowerCase().includes('inventory value')) {
+      setTimeout(() => {
+        setMessages(p => [...p, {
+          id: Date.now()+1, role: 'assistant', type: 'complex', activeView: 'bar', dataKey: 'inventory',
+          data: [{ name: 'IWP', inventory: 4500000 }, { name: 'ECL', inventory: 2800000 }, { name: 'Box & Crate', inventory: 1200000 }],
+          text: "Here is the current Epicor inventory valuation breakdown across all major entities. IWP holds the highest inventory value at $4.5M."
+        }]);
+      }, 1000);
+      return;
+    }
+
+    if (q.toLowerCase().includes('order backlog')) {
+      setTimeout(() => {
+        setMessages(p => [...p, {
+          id: Date.now()+1, role: 'assistant', type: 'complex', activeView: 'line', dataKey: 'backlog',
+          data: [{ name: 'IWP', backlog: 8200000 }, { name: 'ECL', backlog: 5400000 }, { name: 'Box & Crate', backlog: 1800000 }],
+          text: "The total consolidated order backlog currently stands at $15.4M. IWP makes up the largest portion at $8.2M."
+        }]);
+      }, 1000);
+      return;
+    }
+
     // Try Web-LLM for custom questions
     if (engine) {
       setMessages(p => [...p, { id: 'loading', role: 'assistant', text: 'Thinking...', type: 'text' }]);
@@ -383,7 +417,8 @@ function ChatWidget() {
   };
 
   return (
-    <div className="fixed bottom-8 right-8 z-50 flex flex-col items-end">
+    <>
+      <div className="fixed bottom-8 right-8 z-50 flex flex-col items-end">
       {isOpen && (
         <div className="w-[550px] h-[750px] mb-4 bg-slate-900 border border-slate-700 shadow-2xl rounded-2xl flex flex-col overflow-hidden transform transition-all duration-300 origin-bottom-right">
           {/* Header */}
@@ -473,6 +508,8 @@ function ChatWidget() {
             <div className="flex gap-2 mb-3 overflow-x-auto pb-1 scrollbar-hide">
                <button onClick={()=>handleSend(null, "Top 3 plants by board-foot?")} className="whitespace-nowrap px-3 py-1.5 rounded-full bg-slate-700 text-[11px] font-medium text-emerald-400 hover:bg-slate-600 border border-slate-600 transition-colors">Top 3 plants by board-foot?</button>
                <button onClick={()=>handleSend(null, "Compare overtime costs IWP vs Box?")} className="whitespace-nowrap px-3 py-1.5 rounded-full bg-slate-700 text-[11px] font-medium text-emerald-400 hover:bg-slate-600 border border-slate-600 transition-colors">Compare overtime IWP vs Box</button>
+               <button onClick={()=>handleSend(null, "Inventory value by plant?")} className="whitespace-nowrap px-3 py-1.5 rounded-full bg-slate-700 text-[11px] font-medium text-emerald-400 hover:bg-slate-600 border border-slate-600 transition-colors">Inventory value by plant?</button>
+               <button onClick={()=>handleSend(null, "Show order backlog")} className="whitespace-nowrap px-3 py-1.5 rounded-full bg-slate-700 text-[11px] font-medium text-emerald-400 hover:bg-slate-600 border border-slate-600 transition-colors">Show order backlog</button>
             </div>
             <form onSubmit={handleSend} className="flex gap-2">
               <input value={input} onChange={e=>setInput(e.target.value)} type="text" placeholder="Message Tim..." className="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors" />
@@ -490,6 +527,7 @@ function ChatWidget() {
         {isOpen ? <X size={24} /> : <MessageSquare size={24} />}
       </button>
     </div>
+    </>
   );
 }
 
@@ -517,6 +555,101 @@ function PremiumKpiCard({ title, value, trend, chartData, color }) {
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData.map((uv,i)=>({name:i,uv}))}><Area type="monotone" dataKey="uv" stroke={c} fill={`${c}22`} strokeWidth={2} /></AreaChart>
         </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
+function DataArchitectureView() {
+  return (
+    <div className="max-w-6xl mx-auto">
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-white mb-2">Data Architecture & Integration Flow</h2>
+        <p className="text-slate-400">Near real-time data pipeline from 5 entities running Epicor LumberTrack and Dynamics GP into the centralized Analytics Data Lake.</p>
+      </div>
+
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
+        {/* Source Systems */}
+        <div className="flex flex-col gap-4 w-full md:w-1/3">
+          <div className="glass-panel p-6 rounded-2xl border-emerald-500/30 relative">
+            <div className="absolute top-0 right-0 p-3"><Database className="text-emerald-500 w-6 h-6 opacity-50"/></div>
+            <h3 className="font-bold text-white text-lg mb-2">Epicor LumberTrack (ERP)</h3>
+            <p className="text-xs text-slate-400 mb-3">5 Entity Nodes (EINs)</p>
+            <ul className="text-sm text-slate-300 space-y-1 ml-4 list-disc marker:text-emerald-500">
+              <li>Inventory / Yard Operations</li>
+              <li>Production & Yield Data</li>
+              <li>Order Backlogs</li>
+              <li>Machine Piece-Rates</li>
+            </ul>
+          </div>
+          
+          <div className="glass-panel p-6 rounded-2xl border-blue-500/30 relative">
+            <div className="absolute top-0 right-0 p-3"><Database className="text-blue-500 w-6 h-6 opacity-50"/></div>
+            <h3 className="font-bold text-white text-lg mb-2">Microsoft Dynamics GP</h3>
+            <p className="text-xs text-slate-400 mb-3">Financials</p>
+            <ul className="text-sm text-slate-300 space-y-1 ml-4 list-disc marker:text-blue-500">
+              <li>General Ledger</li>
+              <li>Accounts Payable / Receivable</li>
+              <li>Payroll & Overtime Costs</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Integration Pipeline */}
+        <div className="flex flex-col items-center justify-center w-full md:w-1/4">
+          <div className="flex flex-col items-center">
+             <div className="flex items-center text-slate-400 mb-2">
+                <div className="h-0.5 w-16 bg-gradient-to-r from-emerald-500 to-amber-500"></div>
+                <ArrowRight className="w-5 h-5 mx-2 text-amber-500" />
+                <div className="h-0.5 w-16 bg-gradient-to-r from-amber-500 to-purple-500"></div>
+             </div>
+             
+             <div className="glass-panel p-4 rounded-full border-amber-500/40 shadow-lg shadow-amber-900/20 mb-2">
+                <RefreshCw className="w-8 h-8 text-amber-400 animate-spin-slow" />
+             </div>
+             
+             <p className="text-center text-xs font-bold text-white uppercase tracking-wider mb-1">ETL Pipeline</p>
+             <p className="text-center text-xs text-slate-400">Near Real-Time Sync (15m)</p>
+          </div>
+        </div>
+
+        {/* Data Lake & Analytics */}
+        <div className="flex flex-col gap-4 w-full md:w-1/3">
+          <div className="glass-panel p-8 rounded-2xl border-purple-500/30 bg-gradient-to-br from-slate-900 to-slate-800 shadow-2xl relative overflow-hidden">
+            <div className="absolute -top-10 -right-10 opacity-10"><Cloud className="w-40 h-40 text-purple-400"/></div>
+            <div className="flex items-center gap-3 mb-4">
+              <Server className="w-8 h-8 text-purple-400" />
+              <h3 className="font-bold text-white text-xl">Analytics Data Lake</h3>
+            </div>
+            <p className="text-sm text-slate-300 mb-4 leading-relaxed">Centralized repository for consolidated reporting across all 5 EINs. Data is standardized and structured for high-performance querying.</p>
+            
+            <div className="bg-slate-950/50 rounded-lg p-4 border border-slate-700/50">
+               <h4 className="text-xs font-bold text-slate-400 uppercase mb-2">Serving Layer (API)</h4>
+               <div className="flex items-center justify-between text-sm">
+                  <span className="text-emerald-400 font-medium">Operations API</span>
+                  <span className="text-blue-400 font-medium">Financial API</span>
+               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="glass-panel p-6 rounded-2xl border-slate-800/50">
+        <h3 className="font-bold text-white mb-4">Integration Details</h3>
+        <div className="grid grid-cols-3 gap-6 text-sm">
+          <div>
+            <h4 className="text-slate-400 mb-1">Data Frequency</h4>
+            <p className="text-white font-medium">Every 15 Minutes (Delta Sync)</p>
+          </div>
+          <div>
+            <h4 className="text-slate-400 mb-1">Data Volume</h4>
+            <p className="text-white font-medium">~50GB / Month</p>
+          </div>
+          <div>
+            <h4 className="text-slate-400 mb-1">Transformations</h4>
+            <p className="text-white font-medium">Currency conversion, EIN mapping</p>
+          </div>
+        </div>
       </div>
     </div>
   );
