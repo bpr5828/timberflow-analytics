@@ -221,10 +221,18 @@ function OperationsView({ mbf, opsData, pieceLogs }) {
         <p className="text-slate-400">Board feet, piece-rate, and LRF metrics.</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-4 gap-6 mb-8">
         <PremiumKpiCard title="Total MBF Processed" value={mbf.toLocaleString()} trend="+4.5%" chartData={[800,900,850,1100,mbf]} color="blue" isGood />
         <PremiumKpiCard title="Avg LRF %" value="68.3%" trend="Target: 65%" chartData={[62,64,65,67,68.3]} color="emerald" isGood />
         <PremiumKpiCard title="Piece-Rate Payout" value="$2,000" trend="Shift Total" chartData={[1500,1600,1800,1900,2000]} color="purple" isGood />
+        <PremiumKpiCard title="Safety Incidents" value={opsData.reduce((acc, curr) => acc + (curr.safetyIncidents || 0), 0)} trend="YTD" chartData={[2,1,0,0,0]} color="amber" isGood />
+      </div>
+
+      <div className="grid grid-cols-4 gap-6 mb-8">
+        <PremiumKpiCard title="Total Maint. Cost" value={`$${(opsData.reduce((acc, curr) => acc + (curr.maintenanceCost || 0), 0) / 1000).toFixed(1)}k`} trend="-2.1%" chartData={[120,115,110,105,108]} color="amber" isGood />
+        <PremiumKpiCard title="Log Yard Inventory" value={`${opsData.reduce((acc, curr) => acc + (curr.logYardInventoryMBF || 0), 0).toLocaleString()} MBF`} trend="+5.2%" chartData={[6000,6200,6100,6300,6400]} color="blue" isGood />
+        <PremiumKpiCard title="Energy Consumption" value={`${(opsData.reduce((acc, curr) => acc + (curr.energyConsumptionkWh || 0), 0) / 1000).toFixed(0)}k kWh`} trend="-8%" chartData={[280,290,270,265,265]} color="purple" isGood />
+        <PremiumKpiCard title="On-Time Delivery" value="94%" trend="+1.2%" chartData={[90,92,91,93,94]} color="emerald" isGood />
       </div>
 
       <div className="grid grid-cols-2 gap-6 mb-8">
@@ -263,6 +271,8 @@ function OperationsView({ mbf, opsData, pieceLogs }) {
 function FinancialsView({ financials }) {
   const totalEbitda = financials.reduce((acc, curr) => acc + (curr.ebitda || 0), 0);
   const totalOvertime = financials.reduce((acc, curr) => acc + (curr.overtimeCost || 0), 0);
+  const totalOperatingExp = financials.reduce((acc, curr) => acc + (curr.operatingExpenses || 0), 0);
+  const totalNetIncome = totalEbitda - totalOperatingExp;
   
   return (
     <>
@@ -271,10 +281,11 @@ function FinancialsView({ financials }) {
         <p className="text-slate-400">Profitability, labor costs, and EBITDA margins across entities.</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-6 mb-8">
-        <PremiumKpiCard title="Total EBITDA" value={`$${(totalEbitda / 1000).toFixed(0)}k`} trend="+8.2%" chartData={[300, 320, 310, 400, totalEbitda/1000]} color="emerald" isGood />
-        <PremiumKpiCard title="Overtime Costs" value={`$${(totalOvertime / 1000).toFixed(1)}k`} trend="-2.4%" chartData={[30, 25, 28, 20, totalOvertime/1000]} color="blue" isGood />
-        <PremiumKpiCard title="Operating Margin" value="18.5%" trend="Target: 20%" chartData={[15, 16, 18, 17, 18.5]} color="purple" isGood />
+      <div className="grid grid-cols-4 gap-6 mb-8">
+        <PremiumKpiCard title="Total EBITDA" value={`$${(totalEbitda / 1000000).toFixed(1)}M`} trend="+8.2%" chartData={[3, 3.2, 3.1, 4, totalEbitda/1000000]} color="emerald" isGood />
+        <PremiumKpiCard title="Overtime Costs" value={`$${(totalOvertime / 1000).toFixed(1)}k`} trend="-2.4%" chartData={[300, 250, 280, 200, totalOvertime/1000]} color="amber" isGood />
+        <PremiumKpiCard title="Operating Margin" value="23.5%" trend="Target: 20%" chartData={[18, 19, 21, 22, 23.5]} color="purple" isGood />
+        <PremiumKpiCard title="Net Income" value={`$${(totalNetIncome / 1000000).toFixed(1)}M`} trend="+12.1%" chartData={[2, 2.1, 2.0, 2.5, totalNetIncome/1000000]} color="blue" isGood />
       </div>
 
       <div className="grid grid-cols-2 gap-6 mb-8">
